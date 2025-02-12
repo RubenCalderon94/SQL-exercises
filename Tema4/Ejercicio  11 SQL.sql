@@ -1,0 +1,1 @@
+SELECT * FROM jardineria.listado_pagos_clientes;
