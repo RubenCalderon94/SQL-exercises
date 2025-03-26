@@ -65,28 +65,75 @@ DELIMITER ;
 
 CALL SumaSalario('Interno');
 
-/*
-DELIMITER $$
-DROP PROCEDURE IF EXISTS SumaSalario $$
-CREATE PROCEDURE SumaSalario(IN func VARCHAR(10))
-BEGIN
-	SELECT CONCAT(SUM(SALARIO), "€") AS TOTAL FROM plantilla WHERE FUNCION = func;
-END $$
-DELIMITER ;
-
-CALL SumaSalario('Interno');
-*/
-
-
-
 
 #5.	¿Qué modificación habría que incorporar en el anterior para poder ejecutar el procedimiento almacenado sin pasarle ningún parámetro y que devuelva el total del salario para toda la plantilla?
 
+DELIMITER $$
+DROP PROCEDURE IF EXISTS SumaSalario $$
+CREATE PROCEDURE SumaSalario()
+BEGIN
+	SELECT CONCAT((SUM(SALARIO), "€")) AS TOTAL FROM plantilla 
+    WHERE FUNCION = FUNC;
+
+END $$
+
+DELIMITER ;
+
+CALL SumaSalario();
 
 #6.	Crear un procedimiento almacenado que permita pasar un doctor de una especialidad a otra, pasando como parámetros la nueva especialidad y parte de su apellido.
+
+DELIMITER $$
+DROP PROCEDURE IF EXISTS CambiarEspecialidad $$
+CREATE PROCEDURE CambiarEspecialidad (IN newEspecialidad VARCHAR(50), IN apellido_in VARCHAR(50))
+BEGIN
+	UPDATE doctor SET ESPECIALIDAD = newEspecialidad
+    WHERE APELLIDO LIKE concat('%', apellido_in, '%');
+END $$
+DELIMITER ;
+
+CALL CambiarEspecialidad('Pedriatria','Cabez')
 
 
 #7.	Crear un procedimiento almacenado que calcule el total de enfermos y lo devuelva como valor.
 
+DELIMITER $$
+DROP PROCEDURE IF EXISTS TotalEnfermos $$
+CREATE PROCEDURE TotalEnfermos(OUT num int)
+BEGIN
+	SET num = (SELECT COUNT(*) FROM ENFERMOS);
+END $$
+DELIMITER ;
 
-#8.	Crear un procedimiento almacenado que calcule el número de camas ocupadas en un hospital dado su código como parámetro y, opcionalmente, un nombre de sala. Si este último no se proporciona deberá calcularse el total para todas las salas de las que disponga.
+CALL TotalEnfermos(@numero);
+SELECT @numero;
+
+#8.	Crear un procedimiento almacenado que calcule el número de camas ocupadas en un hospital dado su código como parámetro y,
+# opcionalmente, un nombre de sala. Si este último no se proporciona deberá calcularse el total para todas las salas de las que disponga.
+
+DELIMITER $$
+DROP PROCEDURE IF EXISTS numCamasOcupadas $$
+CREATE PROCEDURE numCamasOcupadas(IN hospital_in int, IN nomsala VARCHAR(20), OUT cocupadas int)
+BEGIN
+	if nomsala != null then
+		SET cocupadas = (SELECT count(*) FROM ocupacion inner join sala ON ocupacion.SALA_COD = sala.SALA_COD
+        WHERE ocupacion.HOSPITAL_COD = hospital_in AND sala.NOMBRE like(nomsala));
+    else
+		SET cocupadas = (SELECT count(*) FROM ocupacion WHERE HOSPITAL_COD = hospital_in);
+        -- SELECT count(*) INTO coucupadas FROM ocupacion WHERE HOSPITAL_COD = hospital_in;
+    end if;
+
+END $$
+
+DELIMITER ;
+
+CALL numCamasOcupadas(13, 'Psiquiatrico', @ocupadas);
+SELECT @ocupadas;
+CALL numCamasOcupadas(22, null, @ocupadas);
+
+
+
+
+
+
+
