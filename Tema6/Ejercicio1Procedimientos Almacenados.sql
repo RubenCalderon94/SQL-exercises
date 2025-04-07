@@ -96,29 +96,30 @@ CALL CambiarEspecialidad('Pedriatria','Cabez')
 
 
 #7.	Crear un procedimiento almacenado que calcule el total de enfermos y lo devuelva como valor.
-
 DELIMITER $$
 DROP PROCEDURE IF EXISTS TotalEnfermos $$
 CREATE PROCEDURE TotalEnfermos(OUT num int)
 BEGIN
-	SET num = (SELECT COUNT(*) FROM ENFERMOS);
+	SET num = (SELECT COUNT(*) FROM enfermo);-- utilizamos la variable num, es donde guadaremos el resultado de la consulta.
 END $$
 DELIMITER ;
 
-CALL TotalEnfermos(@numero);
-SELECT @numero;
+CALL TotalEnfermos(@numero);-- el arroba dispone el resultado que nos devulve y la vamos a llamar (numero) =  @numero
+SELECT @numero;-- llamamos a la variable @numero y nos devulve el resultado.
+
 
 #8.	Crear un procedimiento almacenado que calcule el número de camas ocupadas en un hospital dado su código como parámetro y,
 # opcionalmente, un nombre de sala. Si este último no se proporciona deberá calcularse el total para todas las salas de las que disponga.
-
 DELIMITER $$
 DROP PROCEDURE IF EXISTS numCamasOcupadas $$
-CREATE PROCEDURE numCamasOcupadas(IN hospital_in int, IN nomsala VARCHAR(20), OUT cocupadas int)
+CREATE PROCEDURE numCamasOcupadas(IN hospital_in int, IN nomsala VARCHAR(20), OUT cocupadas int)-- le pasamos como parametro codigo Hospital (hospital_in este no es el codigo hospital
+-- real de la tabla, tambien le pasamos nombre de la sala (nomsala) , tampoco es real de la tabla , SON VARIABLES QUE VAMOS A CREAR y por ultimo (out ocupadas int) VARIBLE QUE NOS DEVUELVE)
 BEGIN
-	if nomsala != null then
-		SET cocupadas = (SELECT count(*) FROM ocupacion inner join sala ON ocupacion.SALA_COD = sala.SALA_COD
+	if nomsala != null then-- SI LE HEMOS PASADO NOMBRE DE SALA ENTRO EN EL BUCLE
+		-- CON SET ASIGNAMOS EL VALOR QUE NOS DARA LA CONSULTA DEFINIDA
+		SET cocupadas = (SELECT count(*) FROM ocupacion inner join sala ON ocupacion.SALA_COD = sala.SALA_COD 
         WHERE ocupacion.HOSPITAL_COD = hospital_in AND sala.NOMBRE like(nomsala));
-    else
+    else -- SI NO HAY NOMBRE SALA PASADO POR PARAMETRO , SOLO HACE LA CONSULTA DE OCUPADAS POR CODIGO no POR NOMBRE SALA
 		SET cocupadas = (SELECT count(*) FROM ocupacion WHERE HOSPITAL_COD = hospital_in);
         -- SELECT count(*) INTO coucupadas FROM ocupacion WHERE HOSPITAL_COD = hospital_in;
     end if;
@@ -127,9 +128,9 @@ END $$
 
 DELIMITER ;
 
-CALL numCamasOcupadas(13, 'Psiquiatrico', @ocupadas);
-SELECT @ocupadas;
-CALL numCamasOcupadas(22, null, @ocupadas);
+CALL numCamasOcupadas(13, 'Psiquiatrico', @ocupadas);-- PASAMOS PARAMETRO DE LA HABITACION , NOMBRE SALA Y NOS DEVUELVE EL NUMERO DE OCUPADAS, PORQUE UTILIZAMOS OUT QUE DEVUELVE
+SELECT @ocupadas;  -- GLOBAL OCUPADAS
+CALL numCamasOcupadas(22, null, @ocupadas); -- SOLO POE PARAMETRO DE LA HABITACION, NOMBRE SALE NULL, Y OUT NOS DEVUELVE 
 
 
 

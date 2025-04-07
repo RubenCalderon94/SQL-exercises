@@ -3,16 +3,14 @@
 USE neptuno;
 
 #1.-  introduciendo el identificador de un pedido, se pide obtener el cliente  y la fecha de envío.
-#Hay que realizarlo con dos funciones, una para encontrar el cliente y otra para la fecha de envio.
-#PRIMERA FORMA
 #(opcion 1: no se puede retornar dos parametros, luego una opción sería hacer dos funciones)
 DELIMITER $$
 DROP FUNCTION IF EXISTS IdPedidoCliente $$
-CREATE FUNCTION IdPedidoCliente(Ipedido int)
-	RETURNS VARCHAR(30)
-    DETERMINISTIC
+CREATE FUNCTION IdPedidoCliente(Ipedido int) -- creamos variable para pasar parametro de idpedido que la llamamos Ipedido
+	RETURNS VARCHAR(30)-- Aqui vamos a guardar el nombre del cliente que nos devuelve por el Ipedido introducido
+    DETERMINISTIC -- siempre devuelve el mismo valor 
     BEGIN
-		DECLARE Cliente VARCHAR(30);
+		DECLARE Cliente VARCHAR(30);-- declaramos la variable donde el resultado de la consulta , se guardara hay.
 		SET Cliente = (SELECT clientes.NombreContacto FROM clientes INNER JOIN pedidos
         USING (IdCliente) WHERE pedidos.Idpedido = Ipedido );
         
@@ -22,8 +20,8 @@ CREATE FUNCTION IdPedidoCliente(Ipedido int)
         RETURN Cliente;
     END $$
 DELIMITER ;
-SELECT IdPedidoCliente(10310);
-#segunda funcion
+SELECT IdPedidoCliente(10310);-- pasamos como parametro el idpedidocliente
+#segunda funcion -- LO MISMO PERO OBTENEMOS LA FECHA DE ENVIO EN VEZ DEL NOMBRE DEL CLIENTE COMO EN LA OPCION 1 DE ARRIAB
 DELIMITER $$
 DROP FUNCTION IF EXISTS IdPedidoCliente2 $$
 CREATE FUNCTION IdPedidoCliente2(Ipedido int)
@@ -47,11 +45,11 @@ SELECT IdPedidoCliente2(10310);
 
 DELIMITER $$
 DROP FUNCTION IF EXISTS nombreCompania $$
-CREATE FUNCTION nombreCompania(Ipedido int)
-	RETURNS VARCHAR(40)
+CREATE FUNCTION nombreCompania(Ipedido int) -- introducimos el id pedido a buscar
+	RETURNS VARCHAR(40)-- nos devuelve el nombre de la compañia
     DETERMINISTIC
     BEGIN
-		DECLARE companiaE VARCHAR(40);
+		DECLARE companiaE VARCHAR(40);-- aqui en la variable vamos a guardar el nombre de la compañia que nos devolvera por el id buscado
         SET companiaE = (SELECT companiaenvios.NombreCompania FROM companiaenvios INNER JOIN pedidos
         ON companiaenvios.IdCompaniaEnvios = pedidos.FormaEnvio WHERE pedidos.IdPedido = Ipedido);
         
@@ -62,11 +60,11 @@ CREATE FUNCTION nombreCompania(Ipedido int)
     END $$
 
 DELIMITER ;
-SELECT nombreCompania (10310);
+SELECT nombreCompania (10310);-- por este idpedido nos devolvera el nombre de la compañia
 
 
 #3.- Introduciendo el nombre de un producto, obtener el nombre de la compañía proveedora.
-DELIMITER $$
+DELIMITER $$ -- igual que el anterior pero introduciendo nombre del producto
 DROP FUNCTION IF EXISTS nomProvee $$
 CREATE FUNCTION nomProvee(Nproducto VARCHAR(30))
 	RETURNS VARCHAR(40)
